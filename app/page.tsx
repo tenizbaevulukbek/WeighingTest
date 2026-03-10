@@ -1,65 +1,91 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState, useRef, useEffect } from 'react';
+import { PanInfo } from 'framer-motion';
+import { ItemData } from '../types';
+import { initialItems } from '../data/initialData';
+import { DraggableItem } from '../components/DraggableItem';
+import { Scale } from '../components/Scale';
+import { InputForm } from '../components/InputForm';
+
+export default function WeighingGame() {
+  const [items, setItems] = useState<ItemData[]>(initialItems);
+  const [activeId, setActiveId] = useState<number | null>(null);
+  const [inputValue, setInputValue] = useState('');
+  
+  const scaleRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const activeItem = items.find((i: ItemData) => i.id === activeId);
+  const isDragDisabled = items.some((i: ItemData) => i.status === 'weighing');
+
+  const handleDragEnd = (e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo, id: number) => {
+    if (!scaleRef.current) return;
+    const rect = scaleRef.current.getBoundingClientRect();
+    
+    if (
+      info.point.x >= rect.left &&
+      info.point.x <= rect.right &&
+      info.point.y >= rect.top &&
+      info.point.y <= rect.bottom
+    ) {
+      setItems((prev: ItemData[]) =>
+        prev.map((item: ItemData) => (item.id === id ? { ...item, status: 'weighing' } : item))
+      );
+      setActiveId(id);
+    }
+  };
+
+  useEffect(() => {
+    if (items.some((i: ItemData) => i.status === 'weighing')) {
+      const focusTimer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+      return () => clearTimeout(focusTimer);
+    }
+  }, [items]);
+
+  const handleInputSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (activeId === null || inputValue.trim() === '') return;
+
+    setItems((prev: ItemData[]) =>
+      prev.map((item: ItemData) =>
+        item.id === activeId ? { ...item, status: 'completed', answer: inputValue } : item
+      )
+    );
+    
+    setInputValue('');
+    setActiveId(null);
+  };
+
+  const isInputVisible = items.some((i: ItemData) => i.status === 'weighing');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="relative w-full max-w-6xl bg-white p-6 sm:p-10 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+        <h1 className="text-center text-xl sm:text-3xl font-medium text-slate-800 mb-6 sm:mb-10">Взвесь предметы и животных</h1>
+        
+        <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl border-4 border-slate-100">
+          <img src="/background.png" alt="background" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
+          
+          <div className="absolute left-0 right-0 flex items-end px-[8%] z-20" style={{ bottom: '21%' }}>
+            
+            <div className="flex-1 flex justify-around items-end pr-10">
+              {items.map((item: ItemData) => (
+                <DraggableItem key={item.id} item={item} onDragEnd={handleDragEnd} isDragDisabled={isDragDisabled} />
+              ))}
+            </div>
+
+            <div className="flex-none pb-[2px]">
+              <Scale scaleRef={scaleRef} activeItem={activeItem} />
+            </div>
+            
+          </div>
+          
+          <InputForm activeItem={activeItem} inputValue={inputValue} setInputValue={setInputValue} onSubmit={handleInputSubmit} inputRef={inputRef} isVisible={isInputVisible} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
