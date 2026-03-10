@@ -63,23 +63,19 @@ export default function WeighingGame() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="relative w-full max-w-6xl bg-white p-6 sm:p-10 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-        <h1 className="text-center text-xl sm:text-3xl font-medium text-slate-800 mb-6 sm:mb-10">Взвесь предметы и животных</h1>
+      <div className="relative w-full max-w-5xl bg-white p-6 sm:p-10 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+        <h1 className="text-center text-xl sm:text-2xl font-medium text-slate-800 mb-6 sm:mb-8">Взвесь предметы и животных</h1>
         
         <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl border-4 border-slate-100">
           <img src="/background.png" alt="background" className="absolute inset-0 w-full h-full object-fill pointer-events-none" />
           
-          <div className="absolute left-0 right-0 flex items-end px-[8%] z-20" style={{ bottom: '21%' }}>
+          <div className="absolute left-[8%] right-[8%] flex items-end justify-between z-20" style={{ bottom: '23%' }}>
             
-            <div className="flex-1 flex justify-around items-end pr-10">
-              {items.map((item: ItemData) => (
-                <DraggableItem key={item.id} item={item} onDragEnd={handleDragEnd} isDragDisabled={isDragDisabled} />
-              ))}
-            </div>
+            {items.map((item: ItemData) => (
+              <DraggableItem key={item.id} item={item} onDragEnd={handleDragEnd} isDragDisabled={isDragDisabled} />
+            ))}
 
-            <div className="flex-none pb-[2px]">
-              <Scale scaleRef={scaleRef} activeItem={activeItem} />
-            </div>
+            <Scale scaleRef={scaleRef} activeItem={activeItem} />
             
           </div>
           

@@ -11,7 +11,7 @@ const backendResponse = {
 };
 
 const dimensions = [
-  { width: 148, height: 135 },
+  { width: 147.6, height: 135.16 },
   { width: 132, height: 114 },
   { width: 172, height: 187 }
 ];

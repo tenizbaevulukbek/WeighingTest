@@ -9,12 +9,11 @@ interface Props {
 }
 
 export const DraggableItem: React.FC<Props> = ({ item, onDragEnd, isDragDisabled }) => {
-  // Разрешаем перетаскивание, если предмет не взвешивался (idle) ИЛИ уже взвешен (completed)
   const canDrag = (item.status === 'idle' || item.status === 'completed') && !isDragDisabled;
 
   return (
     <div 
-      className="relative flex items-end justify-center" 
+      className="relative flex items-end justify-center shrink-0" 
       style={{ width: item.width, height: item.height }}
     >
       {item.status !== 'weighing' && (
